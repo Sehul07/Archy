@@ -1875,6 +1875,14 @@ def _run_dsm(
     (new_back_edges is the signal), not a dump, so response_format does not
     apply to it. The full matrix is capped at DEFAULT_MAX_DSM_CELLS cells.
     """
+    graph = _load_graph(path, internal_only=True)
+
+    # Place the check here (after graph is loaded):
+    if focus is not None and focus not in graph:
+        return DSMErrorPayload(error=f"no module {focus!r} under {path}")
+
+    # Rest of the function follows...
+    
     _validate_response_format(response_format)
     graph = _load_graph(path, internal_only=False)
     current = build_dsm(

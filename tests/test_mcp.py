@@ -52,6 +52,7 @@ from archy.mcp import (
 )
 from archy.scan_config import graph_kwargs
 from archy.simulate import EdgeSpec, SimulateReport
+from src.archy.mcp import DSMErrorPayload
 
 
 def _internal_graph(root: Path):
@@ -2255,3 +2256,20 @@ def test_run_diff_strict_refuses_when_the_layer_rules_disappeared(tmp_path: Path
     assert isinstance(result, DiffReport)
     assert result.model_dump()["strict"]["passed"] is False
     assert "no archy.yaml was found" in result.model_dump()["strict"]["reason"]
+
+from archy.mcp import DSMErrorPayload, _run_dsm
+
+def test_archy_dsm_unknown_focus_returns_error(tmp_path):
+    (tmp_path / "mod.py").write_text("import os\n")
+    result = _run_dsm(
+        tmp_path,
+        focus="nope",
+        response_format="text",
+        group_by="community",
+        weight="imports",
+        focus_depth=1,
+        package=None,
+        baseline_path=None,
+    )
+    assert type(result).__name__ == "DSMErrorPayload"
+    assert "no module 'nope'" in result.error
