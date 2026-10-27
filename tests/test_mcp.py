@@ -2273,3 +2273,22 @@ def test_archy_dsm_unknown_focus_returns_error(tmp_path):
     )
     assert type(result).__name__ == "DSMErrorPayload"
     assert "no module 'nope'" in result.error
+
+def test_mcp_cycles_min_size_validation(tmp_path):
+    for invalid_size in (0, -5):
+        with pytest.raises(ValueError, match=r"min_size must be >= 1"):
+            _run_cycles(tmp_path, min_size=invalid_size, internal_only=True)
+
+
+def test_mcp_dsm_focus_depth_validation(tmp_path):
+    with pytest.raises(ValueError, match=r"focus_depth must be >= 0"):
+        _run_dsm(
+            tmp_path,
+            response_format="json",
+            group_by="module",
+            weight="calls",
+            focus=None,
+            focus_depth=-1,
+            package=None,
+            baseline_path=None,
+        )
